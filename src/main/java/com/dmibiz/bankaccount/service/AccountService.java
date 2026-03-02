@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final LedgerRepository ledgerRepository;
+    private final ExternalLoggingService externalLoggingService;
 
     public Account createAccount(String identification) {
        return accountRepository.save(Account.builder()
@@ -40,6 +41,7 @@ public class AccountService {
     }
 
     public void debit(Long accountId, Currency currency, BigDecimal amount) {
+        externalLoggingService.logDebit(); // to simulate a call to an external system
         BigDecimal balance = getBalance(accountId, currency);
 
         if (balance.compareTo(amount) < 0) {
