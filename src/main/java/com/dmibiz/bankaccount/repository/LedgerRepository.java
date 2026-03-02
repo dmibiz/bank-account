@@ -9,7 +9,12 @@ import java.math.BigDecimal;
 
 public interface LedgerRepository extends JpaRepository<LedgerEntry,Long> {
     @Query("""
-                SELECT COALESCE(SUM(l.amount), 0)
+                SELECT COALESCE(SUM(
+                    CASE
+                        WHEN l.type = 'CREDIT' THEN l.amount
+                        ELSE -l.amount
+                    END
+                ), 0)
                 FROM LedgerEntry l
                 WHERE l.account.id = :accountId
                 AND l.currency = :currency

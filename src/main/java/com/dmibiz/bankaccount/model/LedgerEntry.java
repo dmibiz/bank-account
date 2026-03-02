@@ -30,6 +30,10 @@ public class LedgerEntry {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EntryType type;
+
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 }
