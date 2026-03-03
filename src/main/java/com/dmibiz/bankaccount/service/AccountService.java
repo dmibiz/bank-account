@@ -2,6 +2,7 @@ package com.dmibiz.bankaccount.service;
 
 import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
+import com.dmibiz.bankaccount.model.EntryType;
 import com.dmibiz.bankaccount.model.LedgerEntry;
 import com.dmibiz.bankaccount.repository.AccountRepository;
 import com.dmibiz.bankaccount.repository.LedgerRepository;
@@ -36,6 +37,7 @@ public class AccountService {
                 .account(account)
                 .currency(currency)
                 .amount(amount)
+                .type(EntryType.CREDIT)
                 .timestamp(LocalDateTime.now())
                 .build());
     }
@@ -54,6 +56,7 @@ public class AccountService {
                 .account(account)
                 .currency(currency)
                 .amount(amount)
+                .type(EntryType.DEBIT)
                 .timestamp(LocalDateTime.now())
                 .build());
     }
