@@ -8,8 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean
-    public WebClient webClient(WebClient.Builder builder) {
-        return builder
+    public WebClient webClient() {
+        return WebClient.builder()
                 .baseUrl("https://httpstat.us")
                 .build();
     }
