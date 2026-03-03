@@ -21,31 +21,31 @@ public class AccountController {
         return accountService.createAccount(identification);
     }
 
-    @PostMapping("/{id}/credit")
-    public void credit(@PathVariable Long id,
+    @PostMapping("/{identification}/credit")
+    public void credit(@PathVariable String identification,
                        @RequestParam Currency currency,
                        @RequestParam BigDecimal amount) {
-        accountService.credit(id, currency, amount);
+        accountService.credit(identification, currency, amount);
     }
 
-    @PostMapping("/{id}/debit")
-    public void debit(@PathVariable Long id,
+    @PostMapping("/{identification}/debit")
+    public void debit(@PathVariable String identification,
                       @RequestParam Currency currency,
                       @RequestParam BigDecimal amount) {
-        accountService.debit(id, currency, amount);
+        accountService.debit(identification, currency, amount);
     }
 
-    @PostMapping("/{id}/exchange")
-    public void exchange(@PathVariable Long id,
+    @PostMapping("/{identification}/exchange")
+    public void exchange(@PathVariable String identification,
                          @RequestParam Currency from,
                          @RequestParam Currency to,
                          @RequestParam BigDecimal amount) {
-        accountService.exchange(id, from, to, amount);
+        accountService.exchange(identification, from, to, amount);
     }
 
-    @GetMapping("/{id}/balance")
-    public BigDecimal balance(@PathVariable Long id,
+    @GetMapping("/{identification}/balance")
+    public BigDecimal balance(@PathVariable String identification,
                               @RequestParam Currency currency) {
-        return accountService.getBalance(id, currency);
+        return accountService.getBalance(identification, currency);
     }
 }

@@ -28,12 +28,13 @@ public class AccountService {
                .build());
     }
 
-    public BigDecimal getBalance(Long accountId, Currency currency) {
-        return ledgerRepository.calculateBalance(accountId, currency);
+    public BigDecimal getBalance(String accountIdentification, Currency currency) {
+        Account account = getAccountByIdentification(accountIdentification);
+        return ledgerRepository.calculateBalance(account.getId(), currency);
     }
 
-    public void credit(Long accountId, Currency currency, BigDecimal amount) {
-        Account account = getAccountById(accountId);
+    public void credit(String accountIdentification, Currency currency, BigDecimal amount) {
+        Account account = getAccountByIdentification(accountIdentification);
         ledgerRepository.save(LedgerEntry.builder()
                 .account(account)
                 .currency(currency)
@@ -43,15 +44,15 @@ public class AccountService {
                 .build());
     }
 
-    public void debit(Long accountId, Currency currency, BigDecimal amount) {
+    public void debit(String accountIdentification, Currency currency, BigDecimal amount) {
         externalLoggingService.logDebit(); // to simulate a call to an external system
-        BigDecimal balance = getBalance(accountId, currency);
+        BigDecimal balance = getBalance(accountIdentification, currency);
 
         if (balance.compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds");
         }
 
-        Account account = getAccountById(accountId);
+        Account account = getAccountByIdentification(accountIdentification);
 
         ledgerRepository.save(LedgerEntry.builder()
                 .account(account)
@@ -62,13 +63,14 @@ public class AccountService {
                 .build());
     }
 
-    private Account getAccountById(Long id) {
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+
+    private Account getAccountByIdentification(String identification) {
+        return accountRepository.findByIdentification(identification)
+                .orElseThrow(() -> new RuntimeException("Account not found with identification: " + identification));
     }
 
-    public void exchange(Long accountId, Currency from, Currency to, BigDecimal amount) {
-        BigDecimal balance = getBalance(accountId, from);
+    public void exchange(String accountIdentification, Currency from, Currency to, BigDecimal amount) {
+        BigDecimal balance = getBalance(accountIdentification, from);
 
         if (balance.compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds");
@@ -76,7 +78,7 @@ public class AccountService {
 
         BigDecimal converted = exchangeService.convert(from, to, amount);
 
-        debit(accountId, from, amount);
-        credit(accountId, to, converted);
+        debit(accountIdentification, from, amount);
+        credit(accountIdentification, to, converted);
     }
 }
