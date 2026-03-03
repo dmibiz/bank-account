@@ -40,8 +40,7 @@ public class AccountController {
                          @RequestParam Currency from,
                          @RequestParam Currency to,
                          @RequestParam BigDecimal amount) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Currency exchange not implemented yet");
+        accountService.exchange(id, from, to, amount);
     }
 
     @GetMapping("/{id}/balance")

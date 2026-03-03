@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final LedgerRepository ledgerRepository;
+    private final ExchangeService exchangeService;
     private final ExternalLoggingService externalLoggingService;
 
     public Account createAccount(String identification) {
@@ -64,5 +65,18 @@ public class AccountService {
     private Account getAccountById(Long id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+    }
+
+    public void exchange(Long accountId, Currency from, Currency to, BigDecimal amount) {
+        BigDecimal balance = getBalance(accountId, from);
+
+        if (balance.compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient funds");
+        }
+
+        BigDecimal converted = exchangeService.convert(from, to, amount);
+
+        debit(accountId, from, amount);
+        credit(accountId, to, converted);
     }
 }
