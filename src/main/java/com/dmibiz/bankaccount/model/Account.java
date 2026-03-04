@@ -25,6 +25,6 @@ public class Account {
 
     @NotBlank
     @Pattern(regexp = "\\d{7}", message = "Identification must be exactly 7 digits")
-    @Column(name = "identification", nullable = false, unique = true)
+    @Column(name = "identification", nullable = false, length = 7, unique = true)
     private String identification;
 }
