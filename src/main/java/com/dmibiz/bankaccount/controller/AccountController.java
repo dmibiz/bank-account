@@ -4,12 +4,11 @@ import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
 import com.dmibiz.bankaccount.service.AccountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
-@Controller
+@RestController
 @RequestMapping("/accounts")
 @RequiredArgsConstructor
 public class AccountController {
