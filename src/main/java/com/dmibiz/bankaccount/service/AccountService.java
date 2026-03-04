@@ -51,7 +51,7 @@ public class AccountService {
         BigDecimal balance = getBalance(accountIdentification, currency);
 
         if (balance.compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds");
+            throw new InsufficientFundsException(accountIdentification);
         }
 
         Account account = getAccountByIdentification(accountIdentification);

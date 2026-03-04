@@ -1,11 +1,12 @@
 package com.dmibiz.bankaccount.integration;
 
+import com.dmibiz.bankaccount.dto.ErrorResponse;
+import com.dmibiz.bankaccount.dto.Money;
 import com.dmibiz.bankaccount.model.Currency;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -18,8 +19,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-// This needs Docker environment to run
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -43,16 +42,22 @@ class AccountIntegrationTest {
     @LocalServerPort
     private int port;
 
-    @Autowired
     private RestClient restClient;
 
+    @BeforeEach
+    void setupRestClient() {
+        restClient = RestClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .build();
+    }
+
     private String baseUrl(String path) {
-        return "http://localhost:" + port + path;
+        return path; // baseUrl is already set on the RestClient builder
     }
 
     @Test
     void fullFlow_creditDebitBalance() {
-        String identification = "123";
+        String identification = "1234567";
 
         String createJson = "{\"identification\":\"" + identification + "\"}";
         ResponseEntity<String> createResponse = restClient.post()
@@ -82,19 +87,20 @@ class AccountIntegrationTest {
                 .toBodilessEntity();
         assertThat(debitResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
-        ResponseEntity<String> balanceResponse = restClient.get()
-                .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
-                .retrieve()
-                .toEntity(String.class);
+        ResponseEntity<Money> balanceResponse = restClient.get()
+            .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
+            .retrieve()
+            .toEntity(Money.class);
 
         assertThat(balanceResponse.getStatusCode().is2xxSuccessful()).isTrue();
-        assertThat(new BigDecimal(balanceResponse.getBody()))
+        assertThat(balanceResponse.getBody()).isNotNull();
+        assertThat(balanceResponse.getBody().getAmount())
                 .isEqualByComparingTo(new BigDecimal("60.00"));
     }
 
     @Test
     void fullFlow_exchange() {
-        String identification = "123";
+        String identification = "7654321";
 
         String createJson = "{\"identification\":\"" + identification + "\"}";
         restClient.post()
@@ -112,14 +118,16 @@ class AccountIntegrationTest {
                 .retrieve()
                 .toBodilessEntity();
 
-        BigDecimal eurBefore = new BigDecimal(restClient.get()
+        BigDecimal eurBefore = restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
                 .retrieve()
-                .body(String.class));
-        BigDecimal usdBefore = new BigDecimal(restClient.get()
+                .body(Money.class)
+                .getAmount();
+        BigDecimal usdBefore = restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.USD))
                 .retrieve()
-                .body(String.class));
+                .body(Money.class)
+                .getAmount();
 
         String exchangeJson = "{\"from\":\"EUR\",\"to\":\"USD\",\"amount\":20.00}";
         ResponseEntity<Void> exchangeResponse = restClient.post()
@@ -130,14 +138,16 @@ class AccountIntegrationTest {
                 .toBodilessEntity();
         assertThat(exchangeResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
-        BigDecimal eurAfter = new BigDecimal(restClient.get()
+        BigDecimal eurAfter = restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
                 .retrieve()
-                .body(String.class));
-        BigDecimal usdAfter = new BigDecimal(restClient.get()
+                .body(Money.class)
+                .getAmount();
+        BigDecimal usdAfter = restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.USD))
                 .retrieve()
-                .body(String.class));
+                .body(Money.class)
+                .getAmount();
 
         assertThat(eurAfter).isLessThan(eurBefore);
         assertThat(usdAfter).isGreaterThanOrEqualTo(usdBefore);
@@ -145,7 +155,7 @@ class AccountIntegrationTest {
 
     @Test
     void debit_insufficientFundsReturnsError() {
-        String identification = "123";
+        String identification = "1234765";
 
         String createJson = "{\"identification\":\"" + identification + "\"}";
         restClient.post()
@@ -156,13 +166,24 @@ class AccountIntegrationTest {
                 .toBodilessEntity();
 
         String debitJson = "{\"currency\":\"EUR\",\"amount\":10.00}";
-        ResponseEntity<String> response = restClient.method(HttpMethod.POST)
+
+        // Use exchange() with a ConvertibleClientHttpResponse so we can inspect the
+        // 400 response body without RestClient throwing an exception.
+        ResponseEntity<ErrorResponse> response = restClient.post()
                 .uri(baseUrl("/accounts/" + identification + "/debit"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(debitJson)
-                .retrieve()
-                .toEntity(String.class);
+                .exchange((request, clientResponse) -> {
+                    ErrorResponse body = clientResponse.bodyTo(ErrorResponse.class);
+                    return ResponseEntity.status(clientResponse.getStatusCode())
+                            .headers(clientResponse.getHeaders())
+                            .body(body);
+                });
 
-        assertThat(response.getStatusCode().is5xxServerError()).isTrue();
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getStatus()).isEqualTo(400);
+        assertThat(response.getBody().getError()).isEqualTo("Bad Request");
+        assertThat(response.getBody().getMessage()).containsIgnoringCase("Insufficient funds");
     }
 }
