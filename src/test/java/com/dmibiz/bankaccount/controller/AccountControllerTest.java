@@ -88,8 +88,6 @@ class AccountControllerTest {
         when(accountService.getBalance("123", Currency.EUR))
                 .thenReturn(new BigDecimal("123.45"));
 
-        String jsonBody = "{\"currency\":\"EUR\"}";
-
         mockMvc.perform(get("/accounts/123/balance")
                         .param("currency", "EUR")
                         .accept(MediaType.APPLICATION_JSON))
