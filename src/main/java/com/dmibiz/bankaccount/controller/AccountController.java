@@ -24,13 +24,13 @@ public class AccountController {
 
     @PostMapping("/{identification}/credit")
     public void credit(@PathVariable String identification,
-                       @RequestBody CreditDebitRequest creditDebitRequest) {
+                       @RequestBody Money creditDebitRequest) {
         accountService.credit(identification, creditDebitRequest.getCurrency(), creditDebitRequest.getAmount());
     }
 
     @PostMapping("/{identification}/debit")
     public void debit(@PathVariable String identification,
-                      @RequestBody CreditDebitRequest request) {
+                      @RequestBody Money request) {
         accountService.debit(identification, request.getCurrency(), request.getAmount());
     }
 
@@ -41,8 +41,12 @@ public class AccountController {
     }
 
     @GetMapping("/{identification}/balance")
-    public BigDecimal balance(@PathVariable String identification,
+    public Money balance(@PathVariable String identification,
                               @RequestParam Currency currency) {
-        return accountService.getBalance(identification, currency);
+        BigDecimal balance = accountService.getBalance(identification, currency);
+        return Money.builder()
+                .currency(currency)
+                .amount(balance)
+                .build();
     }
 }
