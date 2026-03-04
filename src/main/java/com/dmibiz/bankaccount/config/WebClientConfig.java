@@ -10,7 +10,7 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("https://httpstat.us")
+                .baseUrl("https://tools-httpstatus.pickup-services.com")
                 .build();
     }
 }
