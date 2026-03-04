@@ -2,6 +2,7 @@ package com.dmibiz.bankaccount.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Entity
@@ -18,6 +19,7 @@ public class Account {
     private Long id;
 
     @NotBlank
-    @Column(name = "identification", length = 7, nullable = false, unique = true)
+    @Pattern(regexp = "\\d{7}", message = "Identification must be exactly 7 digits")
+    @Column(name = "identification", nullable = false, unique = true)
     private String identification;
 }
