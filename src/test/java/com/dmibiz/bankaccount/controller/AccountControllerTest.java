@@ -37,9 +37,11 @@ class AccountControllerTest {
 
         when(accountService.createAccount("123")).thenReturn(account);
 
+        String jsonBody = "{\"identification\":\"123\"}";
+
         mockMvc.perform(post("/accounts")
-                        .param("identification", "123")
-                        .accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody))
                 .andExpect(status().isOk());
 
         verify(accountService).createAccount("123");
@@ -47,9 +49,11 @@ class AccountControllerTest {
 
     @Test
     void credit_delegatesToService() throws Exception {
+        String jsonBody = "{\"currency\":\"EUR\",\"amount\":100.00}";
+
         mockMvc.perform(post("/accounts/123/credit")
-                        .param("currency", "EUR")
-                        .param("amount", "100.00"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody))
                 .andExpect(status().isOk());
 
         verify(accountService).credit("123", Currency.EUR, new BigDecimal("100.00"));
@@ -57,9 +61,11 @@ class AccountControllerTest {
 
     @Test
     void debit_delegatesToService() throws Exception {
+        String jsonBody = "{\"currency\":\"EUR\",\"amount\":50.00}";
+
         mockMvc.perform(post("/accounts/123/debit")
-                        .param("currency", "EUR")
-                        .param("amount", "50.00"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody))
                 .andExpect(status().isOk());
 
         verify(accountService).debit("123", Currency.EUR, new BigDecimal("50.00"));
@@ -67,10 +73,11 @@ class AccountControllerTest {
 
     @Test
     void exchange_delegatesToService() throws Exception {
+        String jsonBody = "{\"from\":\"EUR\",\"to\":\"USD\",\"amount\":10.00}";
+
         mockMvc.perform(post("/accounts/123/exchange")
-                        .param("from", "EUR")
-                        .param("to", "USD")
-                        .param("amount", "10.00"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody))
                 .andExpect(status().isOk());
 
         verify(accountService).exchange("123", Currency.EUR, Currency.USD, new BigDecimal("10.00"));
@@ -81,6 +88,8 @@ class AccountControllerTest {
         when(accountService.getBalance("123", Currency.EUR))
                 .thenReturn(new BigDecimal("123.45"));
 
+        String jsonBody = "{\"currency\":\"EUR\"}";
+
         mockMvc.perform(get("/accounts/123/balance")
                         .param("currency", "EUR")
                         .accept(MediaType.APPLICATION_JSON))
@@ -90,4 +99,3 @@ class AccountControllerTest {
         verify(accountService).getBalance("123", Currency.EUR);
     }
 }
-

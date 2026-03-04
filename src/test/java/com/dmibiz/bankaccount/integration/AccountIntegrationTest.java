@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -52,30 +53,36 @@ class AccountIntegrationTest {
 
     @Test
     void fullFlow_creditDebitBalance() {
-        // 1) Create account
         String identification = "123";
+
+        String createJson = "{\"identification\":\"" + identification + "\"}";
         ResponseEntity<String> createResponse = restClient.post()
-                .uri(baseUrl("/accounts?identification=" + identification))
+                .uri(baseUrl("/accounts"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createJson)
                 .retrieve()
                 .toEntity(String.class);
 
         assertThat(createResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
-        // 2) Credit 100 EUR
+        String creditJson = "{\"currency\":\"EUR\",\"amount\":100.00}";
         ResponseEntity<Void> creditResponse = restClient.post()
-                .uri(baseUrl("/accounts/" + identification + "/credit?currency=" + Currency.EUR + "&amount=100.00"))
+                .uri(baseUrl("/accounts/" + identification + "/credit"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(creditJson)
                 .retrieve()
                 .toBodilessEntity();
         assertThat(creditResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
-        // 3) Debit 40 EUR
+        String debitJson = "{\"currency\":\"EUR\",\"amount\":40.00}";
         ResponseEntity<Void> debitResponse = restClient.post()
-                .uri(baseUrl("/accounts/" + identification + "/debit?currency=" + Currency.EUR + "&amount=40.00"))
+                .uri(baseUrl("/accounts/" + identification + "/debit"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(debitJson)
                 .retrieve()
                 .toBodilessEntity();
         assertThat(debitResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
-        // 4) Check EUR balance = 60.00
         ResponseEntity<String> balanceResponse = restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
                 .retrieve()
@@ -90,19 +97,22 @@ class AccountIntegrationTest {
     void fullFlow_exchange() {
         String identification = "123";
 
-        // create account
+        String createJson = "{\"identification\":\"" + identification + "\"}";
         restClient.post()
-                .uri(baseUrl("/accounts?identification=" + identification))
+                .uri(baseUrl("/accounts"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createJson)
                 .retrieve()
                 .toBodilessEntity();
 
-        // credit some EUR
+        String creditJson = "{\"currency\":\"EUR\",\"amount\":100.00}";
         restClient.post()
-                .uri(baseUrl("/accounts/" + identification + "/credit?currency=" + Currency.EUR + "&amount=100.00"))
+                .uri(baseUrl("/accounts/" + identification + "/credit"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(creditJson)
                 .retrieve()
                 .toBodilessEntity();
 
-        // capture balances before
         BigDecimal eurBefore = new BigDecimal(restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
                 .retrieve()
@@ -112,14 +122,15 @@ class AccountIntegrationTest {
                 .retrieve()
                 .body(String.class));
 
-        // perform exchange 20 EUR -> USD
+        String exchangeJson = "{\"from\":\"EUR\",\"to\":\"USD\",\"amount\":20.00}";
         ResponseEntity<Void> exchangeResponse = restClient.post()
-                .uri(baseUrl("/accounts/" + identification + "/exchange?from=" + Currency.EUR + "&to=" + Currency.USD + "&amount=20.00"))
+                .uri(baseUrl("/accounts/" + identification + "/exchange"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(exchangeJson)
                 .retrieve()
                 .toBodilessEntity();
         assertThat(exchangeResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
-        // balances after
         BigDecimal eurAfter = new BigDecimal(restClient.get()
                 .uri(baseUrl("/accounts/" + identification + "/balance?currency=" + Currency.EUR))
                 .retrieve()
@@ -137,18 +148,22 @@ class AccountIntegrationTest {
     void debit_insufficientFundsReturnsError() {
         String identification = "123";
 
-        // create account without crediting
+        String createJson = "{\"identification\":\"" + identification + "\"}";
         restClient.post()
-                .uri(baseUrl("/accounts?identification=" + identification))
+                .uri(baseUrl("/accounts"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createJson)
                 .retrieve()
                 .toBodilessEntity();
 
+        String debitJson = "{\"currency\":\"EUR\",\"amount\":10.00}";
         ResponseEntity<String> response = restClient.method(HttpMethod.POST)
-                .uri(baseUrl("/accounts/" + identification + "/debit?currency=" + Currency.EUR + "&amount=10.00"))
+                .uri(baseUrl("/accounts/" + identification + "/debit"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(debitJson)
                 .retrieve()
                 .toEntity(String.class);
 
         assertThat(response.getStatusCode().is5xxServerError()).isTrue();
     }
 }
-

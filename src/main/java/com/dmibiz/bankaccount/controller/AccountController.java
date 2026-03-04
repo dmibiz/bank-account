@@ -1,5 +1,6 @@
 package com.dmibiz.bankaccount.controller;
 
+import com.dmibiz.bankaccount.dto.*;
 import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
 import com.dmibiz.bankaccount.service.AccountService;
@@ -16,30 +17,27 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping
-    public Account create(@RequestParam String identification) {
-        return accountService.createAccount(identification);
+    public AccountResponse create(@RequestBody CreateAccountRequest createAccountRequest) {
+        Account account = accountService.createAccount(createAccountRequest.getIdentification());
+        return new AccountResponse(account.getIdentification());
     }
 
     @PostMapping("/{identification}/credit")
     public void credit(@PathVariable String identification,
-                       @RequestParam Currency currency,
-                       @RequestParam BigDecimal amount) {
-        accountService.credit(identification, currency, amount);
+                       @RequestBody CreditDebitRequest creditDebitRequest) {
+        accountService.credit(identification, creditDebitRequest.getCurrency(), creditDebitRequest.getAmount());
     }
 
     @PostMapping("/{identification}/debit")
     public void debit(@PathVariable String identification,
-                      @RequestParam Currency currency,
-                      @RequestParam BigDecimal amount) {
-        accountService.debit(identification, currency, amount);
+                      @RequestBody CreditDebitRequest request) {
+        accountService.debit(identification, request.getCurrency(), request.getAmount());
     }
 
     @PostMapping("/{identification}/exchange")
     public void exchange(@PathVariable String identification,
-                         @RequestParam Currency from,
-                         @RequestParam Currency to,
-                         @RequestParam BigDecimal amount) {
-        accountService.exchange(identification, from, to, amount);
+                         @RequestBody ExchangeRequest exchangeRequest) {
+        accountService.exchange(identification, exchangeRequest.getFrom(), exchangeRequest.getTo(), exchangeRequest.getAmount());
     }
 
     @GetMapping("/{identification}/balance")
