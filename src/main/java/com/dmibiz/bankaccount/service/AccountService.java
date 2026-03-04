@@ -1,5 +1,7 @@
 package com.dmibiz.bankaccount.service;
 
+import com.dmibiz.bankaccount.exception.AccountNotFoundException;
+import com.dmibiz.bankaccount.exception.InsufficientFundsException;
 import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
 import com.dmibiz.bankaccount.model.EntryType;
@@ -66,14 +68,14 @@ public class AccountService {
 
     private Account getAccountByIdentification(String identification) {
         return accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new RuntimeException("Account not found with identification: " + identification));
+                .orElseThrow(() -> new AccountNotFoundException(identification));
     }
 
     public void exchange(String accountIdentification, Currency from, Currency to, BigDecimal amount) {
         BigDecimal balance = getBalance(accountIdentification, from);
 
         if (balance.compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds");
+            throw new InsufficientFundsException(accountIdentification);
         }
 
         BigDecimal converted = exchangeService.convert(from, to, amount);
