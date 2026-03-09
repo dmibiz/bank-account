@@ -22,7 +22,7 @@ class LedgerRepositoryTest {
     @Test
     void calculateBalance_returnsCorrectBalance() {
         Account account = Account.builder()
-                .identification("123")
+                .identification("1234567")
                 .build();
         account = accountRepository.save(account);
 
@@ -64,7 +64,7 @@ class LedgerRepositoryTest {
     @Test
     void calculateBalance_returnsZeroWhenNoEntries() {
         Account account = Account.builder()
-                .identification("456")
+                .identification("4567890")
                 .build();
         account = accountRepository.save(account);
 
