@@ -92,7 +92,7 @@ class AccountControllerTest {
                         .param("currency", "EUR")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("123.45"));
+                .andExpect(content().json("{\"currency\":\"EUR\",\"amount\":123.45}"));
 
         verify(accountService).getBalance("123", Currency.EUR);
     }
