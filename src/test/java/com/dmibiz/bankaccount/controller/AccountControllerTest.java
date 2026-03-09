@@ -32,68 +32,68 @@ class AccountControllerTest {
     void createAccount_createsAndReturnsAccount() throws Exception {
         Account account = Account.builder()
                 .id(1L)
-                .identification("123")
+                .identification("1234567")
                 .build();
 
-        when(accountService.createAccount("123")).thenReturn(account);
+        when(accountService.createAccount("1234567")).thenReturn(account);
 
-        String jsonBody = "{\"identification\":\"123\"}";
+        String jsonBody = "{\"identification\":\"1234567\"}";
 
         mockMvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk());
 
-        verify(accountService).createAccount("123");
+        verify(accountService).createAccount("1234567");
     }
 
     @Test
     void credit_delegatesToService() throws Exception {
         String jsonBody = "{\"currency\":\"EUR\",\"amount\":100.00}";
 
-        mockMvc.perform(post("/accounts/123/credit")
+        mockMvc.perform(post("/accounts/1234567/credit")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk());
 
-        verify(accountService).credit("123", Currency.EUR, new BigDecimal("100.00"));
+        verify(accountService).credit("1234567", Currency.EUR, new BigDecimal("100.00"));
     }
 
     @Test
     void debit_delegatesToService() throws Exception {
         String jsonBody = "{\"currency\":\"EUR\",\"amount\":50.00}";
 
-        mockMvc.perform(post("/accounts/123/debit")
+        mockMvc.perform(post("/accounts/1234567/debit")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk());
 
-        verify(accountService).debit("123", Currency.EUR, new BigDecimal("50.00"));
+        verify(accountService).debit("1234567", Currency.EUR, new BigDecimal("50.00"));
     }
 
     @Test
     void exchange_delegatesToService() throws Exception {
         String jsonBody = "{\"from\":\"EUR\",\"to\":\"USD\",\"amount\":10.00}";
 
-        mockMvc.perform(post("/accounts/123/exchange")
+        mockMvc.perform(post("/accounts/1234567/exchange")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk());
 
-        verify(accountService).exchange("123", Currency.EUR, Currency.USD, new BigDecimal("10.00"));
+        verify(accountService).exchange("1234567", Currency.EUR, Currency.USD, new BigDecimal("10.00"));
     }
 
     @Test
     void balance_returnsServiceBalance() throws Exception {
-        when(accountService.getBalance("123", Currency.EUR))
+        when(accountService.getBalance("1234567", Currency.EUR))
                 .thenReturn(new BigDecimal("123.45"));
 
-        mockMvc.perform(get("/accounts/123/balance")
+        mockMvc.perform(get("/accounts/1234567/balance")
                         .param("currency", "EUR")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"currency\":\"EUR\",\"amount\":123.45}"));
 
-        verify(accountService).getBalance("123", Currency.EUR);
+        verify(accountService).getBalance("1234567", Currency.EUR);
     }
 }

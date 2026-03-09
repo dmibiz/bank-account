@@ -18,24 +18,24 @@ class AccountRepositoryTest {
     @Test
     void findByIdentification_returnsAccountWhenExists() {
         Account account = Account.builder()
-                .identification("123")
+                .identification("1234567")
                 .build();
         accountRepository.save(account);
 
-        Optional<Account> result = accountRepository.findByIdentification("123");
+        Optional<Account> result = accountRepository.findByIdentification("1234567");
 
         assertThat(result)
                 .isPresent()
                 .get()
                 .satisfies(found -> {
                     assertThat(found.getId()).isNotNull();
-                    assertThat(found.getIdentification()).isEqualTo("123");
+                    assertThat(found.getIdentification()).isEqualTo("1234567");
                 });
     }
 
     @Test
     void findByIdentification_returnsEmptyWhenNotExists() {
-        Optional<Account> result = accountRepository.findByIdentification("456");
+        Optional<Account> result = accountRepository.findByIdentification("4567890");
         assertThat(result).isNotPresent();
     }
 }
