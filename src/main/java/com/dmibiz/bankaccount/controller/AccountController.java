@@ -5,6 +5,8 @@ import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
 import com.dmibiz.bankaccount.service.AccountService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,7 +45,7 @@ public class AccountController {
 
     @GetMapping("/{identification}/balance")
     public Money balance(@PathVariable String identification,
-                              @RequestParam Currency currency) {
+                              @NotNull @NotBlank @RequestParam Currency currency) {
         BigDecimal balance = accountService.getBalance(identification, currency);
         return Money.builder()
                 .currency(currency)
