@@ -43,7 +43,7 @@ class AccountServiceTest {
 
     @Test
     void createAccount_shouldPersistAndReturnAccount() {
-        String identification = "123";
+        String identification = "1234567";
         Account saved = Account.builder().id(1L).identification(identification).build();
 
         when(accountRepository.save(any(Account.class))).thenReturn(saved);
@@ -56,7 +56,7 @@ class AccountServiceTest {
 
     @Test
     void getBalance_shouldDelegateToLedgerRepository() {
-        String identification = "123";
+        String identification = "1234567";
         Currency currency = Currency.EUR;
         Account account = Account.builder().id(1L).identification(identification).build();
 
@@ -72,7 +72,7 @@ class AccountServiceTest {
 
     @Test
     void credit_shouldCreateCreditLedgerEntry() {
-        String identification = "123";
+        String identification = "1234567";
         Currency currency = Currency.EUR;
         BigDecimal amount = new BigDecimal("100.00");
         Account account = Account.builder().id(1L).identification(identification).build();
@@ -93,7 +93,7 @@ class AccountServiceTest {
 
     @Test
     void debit_shouldThrowWhenInsufficientFunds() {
-        String identification = "123";
+        String identification = "1234567";
         Currency currency = Currency.EUR;
         BigDecimal amount = new BigDecimal("100.00");
         Account account = Account.builder().id(1L).identification(identification).build();
@@ -108,7 +108,7 @@ class AccountServiceTest {
 
     @Test
     void debit_shouldCreateDebitLedgerEntryWhenEnoughBalance() {
-        String identification = "123";
+        String identification = "1234567";
         Currency currency = Currency.EUR;
         BigDecimal amount = new BigDecimal("50.00");
         Account account = Account.builder().id(1L).identification(identification).build();
@@ -132,7 +132,7 @@ class AccountServiceTest {
 
     @Test
     void exchange_shouldDebitFromSourceAndCreditToTarget() {
-        String identification = "123";
+        String identification = "1234567";
         Currency from = Currency.EUR;
         Currency to = Currency.USD;
         BigDecimal amount = new BigDecimal("10.00");
