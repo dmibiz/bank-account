@@ -36,7 +36,7 @@ public class AccountService {
     }
 
     public void credit(String accountIdentification, Currency currency, BigDecimal amount) {
-        Account account = getAccountByIdentification(accountIdentification);
+        Account account = getAccountByIdentificationForUpdate(accountIdentification);
         ledgerRepository.save(LedgerEntry.builder()
                 .account(account)
                 .currency(currency)
@@ -47,13 +47,12 @@ public class AccountService {
     }
 
     public void debit(String accountIdentification, Currency currency, BigDecimal amount) {
+        Account account = getAccountByIdentificationForUpdate(accountIdentification);
         BigDecimal balance = getBalance(accountIdentification, currency);
 
         if (balance.compareTo(amount) < 0) {
             throw new InsufficientFundsException(accountIdentification);
         }
-
-        Account account = getAccountByIdentification(accountIdentification);
 
         ledgerRepository.save(LedgerEntry.builder()
                 .account(account)
@@ -66,13 +65,9 @@ public class AccountService {
         externalLoggingService.logDebit(); // to simulate a call to an external system
     }
 
-
-    private Account getAccountByIdentification(String identification) {
-        return accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new AccountNotFoundException(identification));
-    }
-
     public void exchange(String accountIdentification, Currency from, Currency to, BigDecimal amount) {
+        Account account = getAccountByIdentificationForUpdate(accountIdentification);
+
         BigDecimal balance = getBalance(accountIdentification, from);
 
         if (balance.compareTo(amount) < 0) {
@@ -81,7 +76,30 @@ public class AccountService {
 
         BigDecimal converted = exchangeService.convert(from, to, amount);
 
-        debit(accountIdentification, from, amount);
-        credit(accountIdentification, to, converted);
+        ledgerRepository.save(LedgerEntry.builder()
+                .account(account)
+                .currency(from)
+                .amount(amount)
+                .type(EntryType.DEBIT)
+                .timestamp(LocalDateTime.now())
+                .build());
+
+        ledgerRepository.save(LedgerEntry.builder()
+                .account(account)
+                .currency(to)
+                .amount(converted)
+                .type(EntryType.CREDIT)
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    private Account getAccountByIdentification(String identification) {
+        return accountRepository.findByIdentification(identification)
+                .orElseThrow(() -> new AccountNotFoundException(identification));
+    }
+
+    private Account getAccountByIdentificationForUpdate(String identification) {
+        return accountRepository.findWithLockByIdentification(identification)
+                .orElseThrow(() -> new AccountNotFoundException(identification));
     }
 }
