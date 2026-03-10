@@ -4,6 +4,7 @@ import com.dmibiz.bankaccount.dto.*;
 import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
 import com.dmibiz.bankaccount.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,19 +25,19 @@ public class AccountController {
 
     @PostMapping("/{identification}/credit")
     public void credit(@PathVariable String identification,
-                       @RequestBody Money creditDebitRequest) {
+                       @Valid @RequestBody Money creditDebitRequest) {
         accountService.credit(identification, creditDebitRequest.getCurrency(), creditDebitRequest.getAmount());
     }
 
     @PostMapping("/{identification}/debit")
     public void debit(@PathVariable String identification,
-                      @RequestBody Money request) {
+                      @Valid @RequestBody Money request) {
         accountService.debit(identification, request.getCurrency(), request.getAmount());
     }
 
     @PostMapping("/{identification}/exchange")
     public void exchange(@PathVariable String identification,
-                         @RequestBody ExchangeRequest exchangeRequest) {
+                         @Valid @RequestBody ExchangeRequest exchangeRequest) {
         accountService.exchange(identification, exchangeRequest.getFrom(), exchangeRequest.getTo(), exchangeRequest.getAmount());
     }
 
