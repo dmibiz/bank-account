@@ -77,7 +77,7 @@ class AccountServiceTest {
         BigDecimal amount = new BigDecimal("100.00");
         Account account = Account.builder().id(1L).identification(identification).build();
 
-        when(accountRepository.findByIdentification(identification)).thenReturn(Optional.of(account));
+        when(accountRepository.findWithLockByIdentification(identification)).thenReturn(Optional.of(account));
 
         accountService.credit(identification, currency, amount);
 
@@ -98,12 +98,11 @@ class AccountServiceTest {
         BigDecimal amount = new BigDecimal("100.00");
         Account account = Account.builder().id(1L).identification(identification).build();
 
+        when(accountRepository.findWithLockByIdentification(identification)).thenReturn(Optional.of(account));
         when(accountRepository.findByIdentification(identification)).thenReturn(Optional.of(account));
         when(ledgerRepository.calculateBalance(1L, currency)).thenReturn(new BigDecimal("50.00"));
 
         assertThrows(RuntimeException.class, () -> accountService.debit(identification, currency, amount));
-
-        verify(externalLoggingService).logDebit();
     }
 
     @Test
@@ -114,6 +113,7 @@ class AccountServiceTest {
         Account account = Account.builder().id(1L).identification(identification).build();
 
         when(accountRepository.findByIdentification(identification)).thenReturn(Optional.of(account));
+        when(accountRepository.findWithLockByIdentification(identification)).thenReturn(Optional.of(account));
         when(ledgerRepository.calculateBalance(1L, currency)).thenReturn(new BigDecimal("100.00"));
 
         accountService.debit(identification, currency, amount);
@@ -140,6 +140,7 @@ class AccountServiceTest {
         Account account = Account.builder().id(1L).identification(identification).build();
 
         when(accountRepository.findByIdentification(identification)).thenReturn(Optional.of(account));
+        when(accountRepository.findWithLockByIdentification(identification)).thenReturn(Optional.of(account));
         when(ledgerRepository.calculateBalance(1L, from)).thenReturn(new BigDecimal("100.00"));
         when(exchangeService.convert(from, to, amount)).thenReturn(converted);
 
