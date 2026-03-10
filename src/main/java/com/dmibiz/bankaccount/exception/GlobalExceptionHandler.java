@@ -100,7 +100,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(status.value())
                 .error(status.getReasonPhrase())
-                .message(ex.getMessage())
+                .message("Unexpected error")
                 .build();
         return ResponseEntity.status(status).body(response);
     }
