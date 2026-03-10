@@ -45,7 +45,7 @@ public class AccountController {
 
     @GetMapping("/{identification}/balance")
     public Money balance(@PathVariable String identification,
-                              @NotNull @NotBlank @RequestParam Currency currency) {
+                              @NotNull @RequestParam Currency currency) {
         BigDecimal balance = accountService.getBalance(identification, currency);
         return Money.builder()
                 .currency(currency)

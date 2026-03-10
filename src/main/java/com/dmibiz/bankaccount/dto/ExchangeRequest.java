@@ -16,11 +16,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ExchangeRequest {
     @NotNull
-    @NotBlank
     private Currency from;
 
     @NotNull
-    @NotBlank
     private Currency to;
 
     @NotNull

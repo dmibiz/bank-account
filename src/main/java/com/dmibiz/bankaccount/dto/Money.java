@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class Money {
     @NotNull
-    @NotBlank
     private Currency currency;
 
     @NotNull
