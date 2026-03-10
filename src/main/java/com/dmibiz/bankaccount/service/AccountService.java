@@ -47,7 +47,6 @@ public class AccountService {
     }
 
     public void debit(String accountIdentification, Currency currency, BigDecimal amount) {
-        externalLoggingService.logDebit(); // to simulate a call to an external system
         BigDecimal balance = getBalance(accountIdentification, currency);
 
         if (balance.compareTo(amount) < 0) {
@@ -63,6 +62,8 @@ public class AccountService {
                 .type(EntryType.DEBIT)
                 .timestamp(LocalDateTime.now())
                 .build());
+
+        externalLoggingService.logDebit(); // to simulate a call to an external system
     }
 
 
