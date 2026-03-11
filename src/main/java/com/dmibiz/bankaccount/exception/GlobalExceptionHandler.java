@@ -102,6 +102,7 @@ public class GlobalExceptionHandler {
                 .error(status.getReasonPhrase())
                 .message("Unexpected error")
                 .build();
+        System.err.println("Unexpected error: " + ex.getMessage());
         return ResponseEntity.status(status).body(response);
     }
 }
