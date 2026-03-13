@@ -5,7 +5,6 @@ import com.dmibiz.bankaccount.model.Account;
 import com.dmibiz.bankaccount.model.Currency;
 import com.dmibiz.bankaccount.service.AccountService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
